@@ -11,6 +11,10 @@ type Async struct {
 }
 
 func NewAsync(writer core.Writer) *Async {
+	if a, ok := writer.(*Async); ok {
+		return a
+	}
+
 	a := &Async{
 		writer: writer,
 		ch:     make(chan *core.Entry, 1000),

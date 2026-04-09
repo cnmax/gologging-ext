@@ -19,6 +19,10 @@ func NewBatcher(
 	batchSize int,
 	flushInterval time.Duration,
 ) *Batcher {
+	if b, ok := writer.(*Batcher); ok {
+		return b
+	}
+
 	b := &Batcher{
 		writer:        writer,
 		ch:            make(chan *core.Entry, 1000),
@@ -28,6 +32,10 @@ func NewBatcher(
 
 	go b.run()
 	return b
+}
+
+func (b *Batcher) Async() bool {
+	return true
 }
 
 func (b *Batcher) Write(e *core.Entry) error {

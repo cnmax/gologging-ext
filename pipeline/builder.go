@@ -51,7 +51,7 @@ func Build(writer core.Writer, opts ...*BuildOptions) core.Writer {
 	}
 
 	if opt.EnableAsync {
-		if _, ok := w.(AsyncCapable); !ok {
+		if ac, ok := w.(AsyncCapable); !ok || !ac.Async() {
 			w = NewAsync(w)
 		}
 	}

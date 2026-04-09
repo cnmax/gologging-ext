@@ -19,6 +19,10 @@ func NewRetry(
 	maxRetries int,
 	baseDelay time.Duration,
 ) *Retry {
+	if r, ok := writer.(*Retry); ok {
+		return r
+	}
+
 	if baseDelay <= 0 {
 		baseDelay = 500 * time.Millisecond
 	}
