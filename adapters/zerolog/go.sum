@@ -1,5 +1,5 @@
-github.com/cnmax/gologging-ext v0.1.0 h1:9bRGAhSmKTJAYxapCSNbC3VHR8rY7ME+U2DSy1hH6kw=
-github.com/cnmax/gologging-ext v0.1.0/go.mod h1:XchR4WGDHFxAbCvblml8QC8zgvyDxFAcU8LPe6l5Syw=
+github.com/cnmax/gologging-ext v0.1.1 h1:KeenYhvmThAeTvZOaPpsE2FPk1XY45v0k0tpRwyIPcc=
+github.com/cnmax/gologging-ext v0.1.1/go.mod h1:XchR4WGDHFxAbCvblml8QC8zgvyDxFAcU8LPe6l5Syw=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

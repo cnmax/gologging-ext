@@ -3,7 +3,7 @@ module github.com/cnmax/gologging-ext/adapters/zerolog
 go 1.26
 
 require (
-	github.com/cnmax/gologging-ext v0.1.0
+	github.com/cnmax/gologging-ext v0.1.1
 	github.com/rs/zerolog v1.35.0
 	github.com/tidwall/gjson v1.18.0
 )
