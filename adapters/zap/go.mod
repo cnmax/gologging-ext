@@ -3,7 +3,7 @@ module github.com/cnmax/gologging-ext/adapters/zap
 go 1.26
 
 require (
-	github.com/cnmax/gologging-ext v0.1.0
+	github.com/cnmax/gologging-ext v0.1.1
 	go.uber.org/zap v1.27.1
 )
 
