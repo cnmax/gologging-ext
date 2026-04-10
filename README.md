@@ -2,8 +2,8 @@
 
 ![Go Version](https://img.shields.io/badge/go-1.26+-blue?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
-[![Go Report Card](https://goreportcard.com/badge/github.com/cnmax/gologging-ext)](https://goreportcard.com/report/github.com/cnmax/gologging-ext)
-![Release](https://img.shields.io/github/v/release/cnmax/gologging-ext)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cnmax/gologging-ext?style=flat-square)](https://goreportcard.com/report/github.com/cnmax/gologging-ext)
+![Release](https://img.shields.io/github/v/release/cnmax/gologging-ext?style=flat-square)
 
 一个支持 **异步、批量、重试、多通道分发** 的 Go logging 扩展库，适用于高吞吐日志处理与消息通知场景。
 
@@ -90,11 +90,13 @@ func TestSlogAdapter(t *testing.T) {
 
     //logger := slog.New(slogAdapter.NewHandler(dispatcher, slog.LevelInfo))
 
-    logger := slog.New(slog.NewMultiHandler(
+    multi := slog.NewMultiHandler(
         slog.NewTextHandler(os.Stdout, nil),
         slogAdapter.NewHandler(dispatcher, slog.LevelInfo),
         slogAdapter.NewHandler(pipeline.NewAsync(wechatSink), slog.LevelError),
-    ))
+    )
+
+    logger := slog.New(multi)
     slog.SetDefault(logger)
 
     slog.Error("发生错误了", "user", "xxx", "age", 18)
@@ -154,7 +156,7 @@ func TestZapAdapter(t *testing.T) {
         ),
     )
 
-    core := zapcore.NewTee(
+    multi := zapcore.NewTee(
         zapcore.NewCore(
             zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
             zapcore.AddSync(os.Stdout),
@@ -164,7 +166,7 @@ func TestZapAdapter(t *testing.T) {
         zapAdapter.NewCore(pipeline.NewAsync(wechatSink), zapcore.ErrorLevel),
     )
     logger := zap.New(
-        core,
+        multi,
         zap.AddCaller(),
         //zap.AddStacktrace(zapcore.ErrorLevel),
     )
@@ -335,6 +337,93 @@ type MySink struct{}
 func (s *MySink) Write(entry *core.Entry) error {
     // 自定义处理逻辑
     return nil
+}
+```
+
+## 🏗️Pipeline Builder
+
+Pipeline Builder 提供了一种灵活的方式来配置日志处理管道，支持异步、批量、重试等特性的组合。
+
+### 使用方法
+
+```go
+import (
+    "time"
+
+    "github.com/cnmax/gologging-ext/pipeline"
+    "github.com/cnmax/gologging-ext/sinks/cls"
+)
+
+// 默认配置
+sink := cls.New(ctx, endpoint, secretID, secretKey, topicID)
+writer := pipeline.Build(sink)
+
+// 自定义配置
+writer := pipeline.Build(sink, &pipeline.BuildOptions{
+    EnableAsync:    true,
+    EnableBatch:    true,
+    EnableRetry:    true,
+    BatchSize:      200,
+    FlushInterval:  5 * time.Second,
+    MaxRetries:     5,
+    BaseDelay:      200 * time.Millisecond,
+})
+
+// 仅启用异步
+writer := pipeline.Build(sink, &pipeline.BuildOptions{
+    EnableAsync:    true,
+    EnableBatch:    false,
+    EnableRetry:    false,
+})
+
+// 与其他管道组合使用
+dispatcher := pipeline.NewDispatcher(
+    pipeline.Build(clsSink),  // CLS sink 使用默认配置
+    pipeline.Build(telegramSink, &pipeline.BuildOptions{  // Telegram 自定义配置
+        EnableAsync:    true,
+        EnableRetry:    true,
+        EnableBatch:    false,  // 消息通知不需要批量
+        MaxRetries:     3,
+    }),
+    pipeline.Build(wechatSink, &pipeline.BuildOptions{  // 微信告警
+        EnableAsync:    true,
+        EnableBatch:    false,
+        EnableRetry:    true,
+        MaxRetries:     5,
+        BaseDelay:      1 * time.Second,
+    }),
+)
+```
+
+### BuildOptions 配置项
+
+```go
+type BuildOptions struct {
+    // 功能开关
+    EnableAsync bool
+    EnableBatch bool
+    EnableRetry bool
+
+    // 批量配置
+    BatchSize     int
+    FlushInterval time.Duration
+
+    // 重试配置
+    MaxRetries int
+    BaseDelay  time.Duration
+}
+```
+
+### 默认配置
+```go
+DefaultBuildOptions() = &BuildOptions{
+    EnableAsync:    true,
+    EnableBatch:    true,
+    EnableRetry:    true,
+    BatchSize:      100,
+    FlushInterval:  2 * time.Second,
+    MaxRetries:     3,
+    BaseDelay:      100 * time.Millisecond,
 }
 ```
 
